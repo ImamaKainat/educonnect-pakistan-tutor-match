@@ -1,116 +1,97 @@
 
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useEffect, useContext } from 'react';
 import { toast } from 'react-toastify';
+import { AuthContext } from '../context/AuthContext';
 
 export const useWishlist = () => {
   const [wishlist, setWishlist] = useState([]);
-  const [wishlistItems, setWishlistItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  
+  const [isLoading, setIsLoading] = useState(true);
+  const { isAuthenticated, user } = useContext(AuthContext);
+
+  // Load wishlist on component mount
   useEffect(() => {
     const fetchWishlist = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        
-        if (token) {
-          // User is logged in, fetch from API
-          const response = await axios.get('/api/wishlist');
-          setWishlistItems(response.data);
-          setWishlist(response.data.map(tutor => tutor.id));
-        } else {
-          // User is not logged in, get from localStorage
-          const storedWishlist = localStorage.getItem('wishlist');
+      if (isAuthenticated && user?.role === 'student') {
+        try {
+          const storedToken = localStorage.getItem('token');
           
-          if (storedWishlist) {
-            const ids = JSON.parse(storedWishlist);
-            setWishlist(ids);
-            
-            // Try to fetch details for each tutor in wishlist
-            try {
-              const tutors = [];
-              for (const id of ids) {
-                const response = await axios.get(`/api/tutors/${id}`);
-                tutors.push(response.data);
+          // Try from API first
+          try {
+            const response = await fetch('/api/wishlist', {
+              headers: {
+                'Authorization': `Bearer ${storedToken}`
               }
-              setWishlistItems(tutors);
-            } catch (error) {
-              console.error('Error fetching wishlist items:', error);
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              setWishlist(data.map(tutor => tutor.id));
+              setIsLoading(false);
+              return;
             }
+          } catch (error) {
+            console.error('API wishlist fetch failed, using localStorage', error);
           }
+          
+          // Fallback to localStorage
+          const storedWishlist = localStorage.getItem('wishlist');
+          if (storedWishlist) {
+            setWishlist(JSON.parse(storedWishlist));
+          }
+        } catch (error) {
+          console.error('Error fetching wishlist:', error);
+        } finally {
+          setIsLoading(false);
         }
-      } catch (error) {
-        console.error('Error fetching wishlist:', error);
-        toast.error('Failed to load wishlist');
-        
-        // Fallback to localStorage
+      } else {
+        // Not authenticated or not a student, use localStorage only
         const storedWishlist = localStorage.getItem('wishlist');
         if (storedWishlist) {
           setWishlist(JSON.parse(storedWishlist));
         }
-      } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
-    
+
     fetchWishlist();
-  }, []);
-  
+  }, [isAuthenticated, user]);
+
+  // Add/remove tutor from wishlist
   const handleWishlist = async (tutorId) => {
-    try {
-      const token = localStorage.getItem('token');
-      
-      if (token) {
-        // User is logged in, use API
-        const response = await axios.post(`/api/wishlist/${tutorId}`);
+    let newWishlist = [...wishlist];
+    
+    if (wishlist.includes(tutorId)) {
+      // Remove from wishlist
+      newWishlist = wishlist.filter(id => id !== tutorId);
+      toast.success('Removed from wishlist');
+    } else {
+      // Add to wishlist
+      newWishlist = [...wishlist, tutorId];
+      toast.success('Added to wishlist');
+    }
+    
+    // Update state and localStorage
+    setWishlist(newWishlist);
+    localStorage.setItem('wishlist', JSON.stringify(newWishlist));
+    
+    // If authenticated as student, also update on server
+    if (isAuthenticated && user?.role === 'student') {
+      try {
+        const storedToken = localStorage.getItem('token');
         
-        // Update local state
-        if (wishlist.includes(tutorId)) {
-          setWishlist(wishlist.filter(id => id !== tutorId));
-          setWishlistItems(wishlistItems.filter(item => item.id !== tutorId));
-          toast.success('Removed from wishlist');
-        } else {
-          // Fetch the tutor details to add to wishlistItems
-          const tutorResponse = await axios.get(`/api/tutors/${tutorId}`);
-          
-          setWishlist([...wishlist, tutorId]);
-          setWishlistItems([...wishlistItems, tutorResponse.data]);
-          toast.success('Added to wishlist');
-        }
-      } else {
-        // User is not logged in, use localStorage
-        let localWishlist = [];
-        const storedWishlist = localStorage.getItem('wishlist');
-        
-        if (storedWishlist) {
-          localWishlist = JSON.parse(storedWishlist);
-        }
-        
-        if (localWishlist.includes(tutorId)) {
-          localWishlist = localWishlist.filter(id => id !== tutorId);
-          setWishlistItems(wishlistItems.filter(item => item.id !== tutorId));
-          toast.success('Removed from wishlist');
-        } else {
-          // Fetch the tutor details to add to wishlistItems
-          try {
-            const response = await axios.get(`/api/tutors/${tutorId}`);
-            setWishlistItems([...wishlistItems, response.data]);
-          } catch (error) {
-            console.error('Error fetching tutor details:', error);
+        await fetch(`/api/wishlist/${tutorId}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${storedToken}`
           }
-          
-          localWishlist.push(tutorId);
-          toast.success('Added to wishlist');
-        }
-        
-        localStorage.setItem('wishlist', JSON.stringify(localWishlist));
-        setWishlist(localWishlist);
+        });
+      } catch (error) {
+        console.error('Error updating wishlist on server:', error);
       }
-    } catch (error) {
-      console.error('Error updating wishlist:', error);
-      toast.error('Failed to update wishlist');
     }
   };
-  
-  return { wishlist, wishlistItems, loading, handleWishlist };
+
+  return { wishlist, isLoading, handleWishlist };
 };
+
+export default useWishlist;

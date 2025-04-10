@@ -1,7 +1,5 @@
 
 import React, { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
-import { toast } from 'react-toastify';
 
 export const AuthContext = createContext();
 
@@ -9,86 +7,81 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  
-  // Check for token on initial load
+
+  // Load user from localStorage on mount
   useEffect(() => {
-    const loadUser = async () => {
-      const token = localStorage.getItem('token');
-      
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-      
-      try {
-        // Set axios default headers
-        setAuthToken(token);
-        
-        const res = await axios.get('/api/auth/user');
-        setUser(res.data);
-        setIsAuthenticated(true);
-      } catch (err) {
-        localStorage.removeItem('token');
-        setUser(null);
-        setIsAuthenticated(false);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const storedUser = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
     
-    loadUser();
-  }, []);
-  
-  // Login user
-  const login = async (email, password) => {
-    try {
-      const res = await axios.post('/api/auth/login', { email, password });
-      
-      localStorage.setItem('token', res.data.token);
-      setAuthToken(res.data.token);
-      setUser(res.data.user);
+    if (storedUser && token) {
+      setUser(JSON.parse(storedUser));
       setIsAuthenticated(true);
-      
-      toast.success('Logged in successfully');
-      return res.data;
-    } catch (err) {
-      const message = err.response?.data?.message || 'Login failed';
-      toast.error(message);
-      throw err;
     }
-  };
-  
+    
+    setLoading(false);
+  }, []);
+
   // Register user
   const signup = async (name, email, password, role) => {
     try {
-      const res = await axios.post('/api/auth/register', { name, email, password, role });
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name, email, password, role })
+      });
       
-      localStorage.setItem('token', res.data.token);
-      setAuthToken(res.data.token);
-      setUser(res.data.user);
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
+      }
+      
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      setUser(data.user);
       setIsAuthenticated(true);
       
-      toast.success('Account created successfully');
-      return res.data;
-    } catch (err) {
-      const message = err.response?.data?.message || 'Signup failed';
-      toast.error(message);
-      throw err;
+      return data;
+    } catch (error) {
+      throw error;
     }
   };
-  
-  // Logout user
-  const logout = () => {
-    localStorage.removeItem('token');
-    setAuthToken(null);
-    setUser(null);
-    setIsAuthenticated(false);
-    toast.info('Logged out successfully');
+
+  // Login user
+  const login = async (email, password) => {
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+      
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      setUser(data.user);
+      setIsAuthenticated(true);
+      
+      return data;
+    } catch (error) {
+      throw error;
+    }
   };
-  
-  // Mock login for demo (without API)
+
+  // Mock login for demo purposes
   const mockLogin = (email, password) => {
-    // Mock users
+    // Mock user data
     const mockUsers = {
       'student@example.com': {
         id: '1',
@@ -112,41 +105,49 @@ export const AuthProvider = ({ children }) => {
         avatar: 'https://randomuser.me/api/portraits/men/68.jpg'
       }
     };
-    
-    if (email in mockUsers && password === 'password') {
-      const user = mockUsers[email];
-      setUser(user);
-      setIsAuthenticated(true);
-      toast.success('Logged in successfully');
-      return { user };
-    } else {
-      toast.error('Invalid credentials');
-      throw new Error('Invalid credentials');
-    }
+
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        // Check if user exists in our mock data
+        if (mockUsers[email] && password === 'password') {
+          const user = mockUsers[email];
+          
+          // Store user data in localStorage
+          localStorage.setItem('user', JSON.stringify(user));
+          localStorage.setItem('token', 'mock-jwt-token');
+          
+          setUser(user);
+          setIsAuthenticated(true);
+          
+          resolve({ user });
+        } else {
+          reject(new Error('Invalid credentials'));
+        }
+      }, 500); // Simulate network delay
+    });
   };
-  
+
+  // Logout user
+  const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    setIsAuthenticated(false);
+  };
+
   return (
     <AuthContext.Provider
       value={{
         user,
         isAuthenticated,
         loading,
-        login,
         signup,
-        logout,
-        mockLogin
+        login,
+        mockLogin,
+        logout
       }}
     >
       {children}
     </AuthContext.Provider>
   );
-};
-
-// Set auth token for axios
-export const setAuthToken = (token) => {
-  if (token) {
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-  } else {
-    delete axios.defaults.headers.common['Authorization'];
-  }
 };

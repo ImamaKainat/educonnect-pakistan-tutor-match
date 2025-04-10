@@ -5,255 +5,213 @@ import Layout from '../../components/common/Layout';
 import SearchBar from '../../components/tutors/SearchBar';
 import TutorFilters from '../../components/tutors/TutorFilters';
 import TutorsList from '../../components/tutors/TutorsList';
+import useWishlist from '../../hooks/useWishlist';
 import { filterTutors } from '../../utils/helpers';
-import { toast } from 'react-toastify';
-import axios from 'axios';
 import './TutorsPage.css';
 
-// Parse query parameters
-const useQuery = () => {
-  return new URLSearchParams(useLocation().search);
-};
+// Mock tutors data
+const mockTutors = [
+  {
+    id: '1',
+    name: 'Ahmed Khan',
+    avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+    subjects: ['Mathematics', 'Physics'],
+    location: 'Lahore',
+    hourlyRate: 1500,
+    rating: 4.8,
+    totalReviews: 56,
+    isVerified: true,
+    about: 'Experienced tutor with 8+ years teaching Mathematics and Physics.'
+  },
+  {
+    id: '2',
+    name: 'Sara Ali',
+    avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
+    subjects: ['English', 'Urdu'],
+    location: 'Islamabad',
+    hourlyRate: 1200,
+    rating: 4.6,
+    totalReviews: 42,
+    isVerified: true,
+    about: 'English literature graduate with a passion for teaching languages.'
+  },
+  {
+    id: '3',
+    name: 'Zain Ahmad',
+    avatar: 'https://randomuser.me/api/portraits/men/3.jpg',
+    subjects: ['Computer Science', 'Mathematics'],
+    location: 'Karachi',
+    hourlyRate: 2000,
+    rating: 4.9,
+    totalReviews: 78,
+    isVerified: true,
+    about: 'Software engineer with a strong background in teaching programming.'
+  },
+  {
+    id: '4',
+    name: 'Ayesha Khan',
+    avatar: 'https://randomuser.me/api/portraits/women/4.jpg',
+    subjects: ['Chemistry', 'Biology'],
+    location: 'Lahore',
+    hourlyRate: 1800,
+    rating: 4.7,
+    totalReviews: 63,
+    isVerified: false,
+    about: 'Medical student helping others excel in science subjects.'
+  },
+  {
+    id: '5',
+    name: 'Hassan Raza',
+    avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+    subjects: ['Economics', 'Accounting'],
+    location: 'Islamabad',
+    hourlyRate: 1700,
+    rating: 4.5,
+    totalReviews: 38,
+    isVerified: true,
+    about: 'Business graduate with experience in teaching economics and accounting.'
+  },
+  {
+    id: '6',
+    name: 'Amna Siddiqui',
+    avatar: 'https://randomuser.me/api/portraits/women/6.jpg',
+    subjects: ['Physics', 'Mathematics'],
+    location: 'Lahore',
+    hourlyRate: 1500,
+    rating: 4.6,
+    totalReviews: 45,
+    isVerified: true,
+    about: 'Physics teacher with experience in preparing students for competitive exams.'
+  },
+  {
+    id: '7',
+    name: 'Bilal Ahmed',
+    avatar: 'https://randomuser.me/api/portraits/men/7.jpg',
+    subjects: ['Computer Science', 'Mathematics'],
+    location: 'Karachi',
+    hourlyRate: 1900,
+    rating: 4.7,
+    totalReviews: 52,
+    isVerified: false,
+    about: 'Computer science graduate specializing in programming and algorithms.'
+  },
+  {
+    id: '8',
+    name: 'Fatima Hassan',
+    avatar: 'https://randomuser.me/api/portraits/women/8.jpg',
+    subjects: ['Biology', 'Chemistry'],
+    location: 'Islamabad',
+    hourlyRate: 1600,
+    rating: 4.8,
+    totalReviews: 61,
+    isVerified: true,
+    about: 'Biology enthusiast with a knack for making complex concepts simple.'
+  }
+];
 
 const TutorsPage = () => {
   const [tutors, setTutors] = useState([]);
   const [filteredTutors, setFilteredTutors] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [wishlist, setWishlist] = useState([]);
-  const query = useQuery();
-  
+  const { wishlist, handleWishlist } = useWishlist();
+  const location = useLocation();
+
+  // Extract search params from URL
   useEffect(() => {
-    const fetchTutors = async () => {
-      try {
-        // Get initial parameters from URL if they exist
-        const subjectParam = query.get('subject');
-        const searchParam = query.get('search');
-        
-        let url = '/api/tutors';
-        let params = {};
-        
-        if (subjectParam) {
-          params.subject = subjectParam;
-        }
-        
-        if (searchParam) {
-          params.search = searchParam;
-        }
-        
-        // Fetch tutors with optional filters
-        const response = await axios.get(url, { params });
-        setTutors(response.data);
-        setFilteredTutors(response.data);
-        
-        // Check if there are URL parameters to apply as filters
-        if (subjectParam || searchParam) {
-          toast.info(`Showing results for ${subjectParam || searchParam}`);
-        }
-      } catch (error) {
-        console.error('Error fetching tutors:', error);
-        toast.error('Failed to fetch tutors');
-        
-        // Fallback to mock data if API fails
-        fetchMockData();
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    const searchParams = new URLSearchParams(location.search);
+    const subject = searchParams.get('subject');
+    const search = searchParams.get('search');
     
-    const fetchWishlist = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        
-        if (token) {
-          const response = await axios.get('/api/wishlist');
-          setWishlist(response.data.map(tutor => tutor.id));
-        } else {
-          // Get wishlist from localStorage if not logged in
-          const storedWishlist = localStorage.getItem('wishlist');
-          if (storedWishlist) {
-            setWishlist(JSON.parse(storedWishlist));
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching wishlist:', error);
-        
-        // Fallback to localStorage if API fails
-        const storedWishlist = localStorage.getItem('wishlist');
-        if (storedWishlist) {
-          setWishlist(JSON.parse(storedWishlist));
-        }
-      }
-    };
-    
-    fetchTutors();
-    fetchWishlist();
-  }, [query]);
-  
-  // Mock data for fallback
-  const fetchMockData = () => {
-    const mockTutors = [
-      {
-        id: '1',
-        name: 'Ahmed Khan',
-        avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
-        subjects: ['Mathematics', 'Physics'],
-        location: 'Lahore',
-        hourlyRate: 1500,
-        rating: 4.8,
-        totalReviews: 56,
-        isVerified: true,
-        about: 'Experienced tutor with 8+ years teaching Mathematics and Physics. I specialize in O/A Levels and university-level courses.'
-      },
-      {
-        id: '2',
-        name: 'Fatima Ali',
-        avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
-        subjects: ['English', 'Urdu', 'History'],
-        location: 'Online',
-        hourlyRate: 1200,
-        rating: 4.5,
-        totalReviews: 42,
-        isVerified: true,
-        about: 'Dedicated language tutor with a passion for helping students improve their communication skills. I offer personalized lessons tailored to your needs.'
-      },
-      {
-        id: '3',
-        name: 'Zain Ahmad',
-        avatar: 'https://randomuser.me/api/portraits/men/3.jpg',
-        subjects: ['Computer Science', 'Mathematics'],
-        location: 'Karachi',
-        hourlyRate: 2000,
-        rating: 4.9,
-        totalReviews: 78,
-        isVerified: true,
-        about: 'Software engineer with a strong background in teaching programming, data structures, and algorithms. I make complex concepts easy to understand.'
-      },
-      {
-        id: '4',
-        name: 'Sara Malik',
-        avatar: 'https://randomuser.me/api/portraits/women/4.jpg',
-        subjects: ['Chemistry', 'Biology'],
-        location: 'Islamabad',
-        hourlyRate: 1800,
-        rating: 4.7,
-        totalReviews: 35,
-        isVerified: false,
-        about: 'PhD candidate in Biochemistry with a passion for teaching science. I believe in practical learning and connecting theories to real-world applications.'
-      },
-      {
-        id: '5',
-        name: 'Usman Khalid',
-        avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
-        subjects: ['Economics', 'Accounting'],
-        location: 'Online',
-        hourlyRate: 1600,
-        rating: 4.4,
-        totalReviews: 28,
-        isVerified: true,
-        about: 'Finance professional with teaching experience at top universities. I can help with coursework, exam preparation, and career guidance.'
-      },
-      {
-        id: '6',
-        name: 'Amna Siddiqui',
-        avatar: 'https://randomuser.me/api/portraits/women/6.jpg',
-        subjects: ['Physics', 'Mathematics'],
-        location: 'Lahore',
-        hourlyRate: 1500,
-        rating: 4.6,
-        totalReviews: 45,
-        isVerified: true,
-        about: 'Physics teacher with experience in preparing students for competitive exams. My approach focuses on building strong foundations and problem-solving skills.'
-      }
-    ];
-    
-    setTutors(mockTutors);
-    setFilteredTutors(mockTutors);
-  };
-  
-  // Handle filtering
-  const handleFilter = (filters) => {
+    // Set initial filters based on URL params
+    if (subject || search) {
+      const initialFilters = {
+        subject: subject || '',
+        search: search || '',
+        location: '',
+        minPrice: 500,
+        maxPrice: 5000,
+        minRating: 0
+      };
+      
+      fetchTutors(initialFilters);
+    } else {
+      fetchTutors();
+    }
+  }, [location.search]);
+
+  // Fetch tutors from API
+  const fetchTutors = async (filters = {}) => {
     setIsLoading(true);
     
-    setTimeout(() => {
-      const filtered = filterTutors(tutors, filters);
-      setFilteredTutors(filtered);
+    try {
+      // Try to fetch from API first
+      const queryParams = new URLSearchParams();
+      
+      if (filters.subject) queryParams.append('subject', filters.subject);
+      if (filters.location) queryParams.append('location', filters.location);
+      if (filters.minPrice) queryParams.append('minPrice', filters.minPrice);
+      if (filters.maxPrice) queryParams.append('maxPrice', filters.maxPrice);
+      if (filters.minRating) queryParams.append('minRating', filters.minRating);
+      if (filters.search) queryParams.append('search', filters.search);
+      
+      const apiUrl = `/api/tutors${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      
+      try {
+        const response = await fetch(apiUrl);
+        
+        if (response.ok) {
+          const data = await response.json();
+          setTutors(data);
+          setFilteredTutors(data);
+          setIsLoading(false);
+          return;
+        }
+      } catch (error) {
+        console.error('API fetch failed, using mock data', error);
+      }
+      
+      // Fallback to mock data
+      let filteredMockData = [...mockTutors];
+      
+      if (filters.search) {
+        const searchTerm = filters.search.toLowerCase();
+        filteredMockData = filteredMockData.filter(tutor => 
+          tutor.name.toLowerCase().includes(searchTerm) || 
+          tutor.subjects.some(subject => subject.toLowerCase().includes(searchTerm))
+        );
+      }
+      
+      filteredMockData = filterTutors(filteredMockData, filters);
+      
+      setTutors(mockTutors);
+      setFilteredTutors(filteredMockData);
+    } catch (error) {
+      console.error('Error fetching tutors:', error);
+    } finally {
       setIsLoading(false);
-    }, 500);
+    }
   };
-  
+
   // Handle search
-  const handleSearch = async (searchTerm) => {
+  const handleSearch = (searchTerm) => {
     if (!searchTerm.trim()) {
       setFilteredTutors(tutors);
       return;
     }
     
-    setIsLoading(true);
+    const searchLower = searchTerm.toLowerCase();
+    const filtered = tutors.filter(tutor => 
+      tutor.name.toLowerCase().includes(searchLower) || 
+      tutor.subjects.some(subject => subject.toLowerCase().includes(searchLower))
+    );
     
-    try {
-      // Try to search via API
-      const response = await axios.get('/api/tutors', {
-        params: { search: searchTerm }
-      });
-      setFilteredTutors(response.data);
-    } catch (error) {
-      console.error('Error searching tutors:', error);
-      
-      // Fallback to local filtering
-      const searchResults = tutors.filter(tutor => 
-        tutor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tutor.subjects.some(subject => 
-          subject.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      );
-      
-      setFilteredTutors(searchResults);
-    } finally {
-      setIsLoading(false);
-    }
+    setFilteredTutors(filtered);
   };
-  
-  // Handle wishlist
-  const handleWishlist = async (tutorId) => {
-    try {
-      const token = localStorage.getItem('token');
-      
-      if (token) {
-        // User is logged in, use API
-        await axios.post(`/api/wishlist/${tutorId}`);
-        
-        // Update local wishlist state
-        if (wishlist.includes(tutorId)) {
-          setWishlist(wishlist.filter(id => id !== tutorId));
-          toast.success('Removed from wishlist');
-        } else {
-          setWishlist([...wishlist, tutorId]);
-          toast.success('Added to wishlist');
-        }
-      } else {
-        // User is not logged in, use localStorage
-        let localWishlist = [];
-        const storedWishlist = localStorage.getItem('wishlist');
-        
-        if (storedWishlist) {
-          localWishlist = JSON.parse(storedWishlist);
-        }
-        
-        if (localWishlist.includes(tutorId)) {
-          localWishlist = localWishlist.filter(id => id !== tutorId);
-          toast.success('Removed from wishlist');
-        } else {
-          localWishlist.push(tutorId);
-          toast.success('Added to wishlist');
-        }
-        
-        localStorage.setItem('wishlist', JSON.stringify(localWishlist));
-        setWishlist(localWishlist);
-      }
-    } catch (error) {
-      console.error('Error updating wishlist:', error);
-      toast.error('Failed to update wishlist');
-    }
+
+  // Handle filters
+  const handleFilter = (filters) => {
+    const filtered = filterTutors(tutors, filters);
+    setFilteredTutors(filtered);
   };
 
   return (
@@ -262,19 +220,16 @@ const TutorsPage = () => {
         <div className="container">
           <h1 className="page-title">Find Tutors</h1>
           
-          {/* Search bar */}
           <div className="search-section">
             <SearchBar onSearch={handleSearch} />
           </div>
           
           <div className="tutors-content">
-            {/* Filters column */}
-            <div className="filters-column">
+            <aside className="filters-sidebar">
               <TutorFilters onFilter={handleFilter} />
-            </div>
+            </aside>
             
-            {/* Tutors list column */}
-            <div className="tutors-column">
+            <div className="tutors-grid">
               <TutorsList 
                 tutors={filteredTutors} 
                 isLoading={isLoading} 

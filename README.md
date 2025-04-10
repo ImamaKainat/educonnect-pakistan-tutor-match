@@ -1,73 +1,86 @@
-# Welcome to your Lovable project
 
-## Project info
+# EduConnect Pakistan
 
-**URL**: https://lovable.dev/projects/77ddee51-a4c1-4f4c-997e-3674703b28ad
+A comprehensive tutoring platform connecting students with qualified tutors across Pakistan.
 
-## How can I edit this code?
+## Project Structure
 
-There are several ways of editing your application.
+This project uses the MERN stack (MongoDB, Express.js, React, Node.js) and is organized into two main directories:
 
-**Use Lovable**
+### Client (Frontend)
+- `client/src/components`: Reusable UI components
+- `client/src/pages`: Page components and routes
+- `client/src/context`: Context providers (Auth, etc.)
+- `client/src/hooks`: Custom React hooks
+- `client/src/utils`: Utility functions and helpers
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/77ddee51-a4c1-4f4c-997e-3674703b28ad) and start prompting.
+### Server (Backend)
+- `server/models`: MongoDB models (User, Tutor, Booking, etc.)
+- `server/routes`: API routes and controllers
+- `server/middleware`: Custom middleware (auth, etc.)
+- `server/server.js`: Main Express.js server
 
-Changes made via Lovable will be committed automatically to this repo.
+## Features
 
-**Use your preferred IDE**
+- User authentication (student, tutor, admin roles)
+- Tutor discovery and filtering
+- Session booking system
+- Wishlist functionality
+- Rating and review system
+- User profiles
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Getting Started
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Prerequisites
+- Node.js (v14 or higher)
+- MongoDB (local or Atlas)
 
-Follow these steps:
+### Installation
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+1. Clone the repository:
+```
+git clone [repository-url]
+cd educonnect-pakistan
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+2. Install dependencies for the server:
+```
+cd server
+npm install
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+3. Install dependencies for the client:
+```
+cd ../client
+npm install
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+4. Create a `.env` file in the server directory with your MongoDB URI and other environment variables (see `.env.example`).
+
+### Running the Application
+
+1. Start the server:
+```
+cd server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+2. In a separate terminal, start the client:
+```
+cd client
+npm start
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+3. Open your browser and navigate to `http://localhost:3000`
 
-**Use GitHub Codespaces**
+## Demo Accounts
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+For testing purposes, you can use the following demo accounts:
 
-## What technologies are used for this project?
+- Student: student@example.com / password
+- Tutor: tutor@example.com / password
+- Admin: admin@example.com / password
 
-This project is built with:
+## License
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/77ddee51-a4c1-4f4c-997e-3674703b28ad) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes it is!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+This project is licensed under the MIT License.
