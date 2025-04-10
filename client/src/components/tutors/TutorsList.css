@@ -1,0 +1,30 @@
+
+.tutors-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tutors-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 16rem;
+}
+
+.tutors-empty {
+  background-color: white;
+  border-radius: var(--radius-md);
+  padding: 2rem;
+  text-align: center;
+}
+
+.empty-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.empty-message {
+  color: var(--text-secondary);
+}

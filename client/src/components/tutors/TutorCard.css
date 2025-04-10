@@ -1,0 +1,206 @@
+
+.tutor-card {
+  background-color: #fff;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tutor-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+.tutor-card-content {
+  padding: 1.5rem;
+}
+
+.tutor-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.tutor-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--primary-light);
+}
+
+.tutor-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  background-color: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.tutor-details {
+  flex: 1;
+}
+
+.tutor-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.verified-badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 1rem;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border: 1px solid #bbdefb;
+}
+
+.tutor-rating {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.reviews-count {
+  margin-left: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.tutor-subjects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.subject-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  background-color: var(--secondary-light);
+  color: white;
+}
+
+.more-badge {
+  background-color: #f5f5f5;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.tutor-pricing {
+  text-align: right;
+}
+
+.hourly-rate {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.rate-period {
+  font-size: 0.875rem;
+  font-weight: normal;
+  color: var(--text-secondary);
+}
+
+.tutor-location {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+.tutor-about {
+  margin-top: 1rem;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.tutor-card-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background-color: #f9f9f9;
+  border-top: 1px solid var(--border-color);
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.wishlist-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.wishlist-btn:hover {
+  border-color: #f44336;
+}
+
+.wishlist-btn.active {
+  background-color: #fff0f0;
+  border-color: #f44336;
+}
+
+.wishlist-icon {
+  width: 20px;
+  height: 20px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z'%3E%3C/path%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  transition: background-image 0.2s ease;
+}
+
+.wishlist-btn.active .wishlist-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23f44336' stroke='%23f44336' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z'%3E%3C/path%3E%3C/svg%3E");
+}
+
+@media (max-width: 768px) {
+  .tutor-info {
+    flex-direction: column;
+  }
+  
+  .tutor-pricing {
+    text-align: left;
+    margin-top: 0.5rem;
+  }
+  
+  .tutor-card-footer {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .card-actions {
+    justify-content: center;
+  }
+}
