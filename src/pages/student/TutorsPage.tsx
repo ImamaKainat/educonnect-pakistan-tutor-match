@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Layout from '@/components/common/Layout';
-import TutorCard, { Tutor } from '@/components/tutors/TutorCard';
+import { Tutor } from '@/components/tutors/TutorCard';
 import TutorFilters from '@/components/tutors/TutorFilters';
 import { FilterOptions, filterTutors } from '@/utils/helpers';
-import { useToast } from '@/components/ui/use-toast';
-import { Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import SearchBar from '@/components/tutors/SearchBar';
+import TutorsList from '@/components/tutors/TutorsList';
+import { useWishlist } from '@/hooks/useWishlist';
 
 // Mock data for tutors
 const mockTutors: Tutor[] = [
@@ -87,18 +86,8 @@ const mockTutors: Tutor[] = [
 const TutorsPage = () => {
   const [tutors, setTutors] = useState<Tutor[]>(mockTutors);
   const [filteredTutors, setFilteredTutors] = useState<Tutor[]>(mockTutors);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [wishlist, setWishlist] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-
-  // Load wishlist from localStorage on component mount
-  useEffect(() => {
-    const storedWishlist = localStorage.getItem('wishlist');
-    if (storedWishlist) {
-      setWishlist(JSON.parse(storedWishlist));
-    }
-  }, []);
+  const { wishlist, handleWishlist } = useWishlist();
 
   // Apply filters
   const handleFilter = (filters: FilterOptions) => {
@@ -113,9 +102,7 @@ const TutorsPage = () => {
   };
 
   // Search functionality
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleSearch = (searchTerm: string) => {
     if (!searchTerm.trim()) {
       setFilteredTutors(tutors);
       return;
@@ -131,31 +118,6 @@ const TutorsPage = () => {
     setFilteredTutors(searchResults);
   };
 
-  // Add/remove tutor from wishlist
-  const handleWishlist = (tutorId: string) => {
-    let newWishlist: string[];
-    
-    if (wishlist.includes(tutorId)) {
-      // Remove from wishlist
-      newWishlist = wishlist.filter(id => id !== tutorId);
-      toast({
-        title: 'Removed from wishlist',
-        description: 'Tutor has been removed from your wishlist',
-      });
-    } else {
-      // Add to wishlist
-      newWishlist = [...wishlist, tutorId];
-      toast({
-        title: 'Added to wishlist',
-        description: 'Tutor has been added to your wishlist',
-      });
-    }
-    
-    // Update state and localStorage
-    setWishlist(newWishlist);
-    localStorage.setItem('wishlist', JSON.stringify(newWishlist));
-  };
-
   return (
     <Layout>
       <div className="container mx-auto py-8 px-4">
@@ -163,19 +125,7 @@ const TutorsPage = () => {
         
         {/* Search bar */}
         <div className="mb-8">
-          <form onSubmit={handleSearch} className="flex w-full max-w-3xl mx-auto">
-            <div className="relative flex-grow">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <Input
-                type="text"
-                placeholder="Search by tutor name or subject..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 w-full"
-              />
-            </div>
-            <Button type="submit" className="ml-2">Search</Button>
-          </form>
+          <SearchBar onSearch={handleSearch} />
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -186,29 +136,12 @@ const TutorsPage = () => {
           
           {/* Tutors list column */}
           <div className="lg:col-span-3">
-            {isLoading ? (
-              <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
-              </div>
-            ) : filteredTutors.length > 0 ? (
-              <div className="space-y-6">
-                {filteredTutors.map((tutor) => (
-                  <TutorCard 
-                    key={tutor.id} 
-                    tutor={tutor} 
-                    onAddToWishlist={handleWishlist}
-                    inWishlist={wishlist.includes(tutor.id)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="bg-white rounded-lg p-8 text-center">
-                <h3 className="text-lg font-semibold mb-2">No tutors found</h3>
-                <p className="text-gray-600">
-                  Try adjusting your search criteria or filters to find more tutors.
-                </p>
-              </div>
-            )}
+            <TutorsList 
+              tutors={filteredTutors} 
+              isLoading={isLoading} 
+              wishlist={wishlist}
+              onAddToWishlist={handleWishlist}
+            />
           </div>
         </div>
       </div>
