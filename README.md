@@ -20,6 +20,36 @@ This project uses the MERN stack (MongoDB, Express.js, React, Node.js) and is or
 - `server/middleware`: Custom middleware (auth, etc.)
 - `server/server.js`: Main Express.js server
 
+## Getting Started
+
+### Prerequisites
+- Node.js (v14 or higher)
+- MongoDB (local or Atlas)
+
+### Installation and Security Setup
+
+1. Install dependencies for the server:
+```
+cd server
+npm install
+```
+
+2. Install dependencies for the client:
+```
+cd ../client
+npm install
+```
+
+3. If you encounter npm audit issues:
+   - For non-critical warnings, you can typically ignore them in development
+   - For critical issues, run `npm audit fix` to apply safe updates
+   - If more aggressive fixes are needed, use `npm audit fix --force` (may cause breaking changes)
+   - For the most stubborn issues, you may need to update specific packages manually
+
+4. Start the application:
+   - Server: `cd server && npm run dev`
+   - Client: `cd client && npm start`
+
 ## Features
 
 - User authentication (student, tutor, admin roles)
@@ -28,58 +58,6 @@ This project uses the MERN stack (MongoDB, Express.js, React, Node.js) and is or
 - Wishlist functionality
 - Rating and review system
 - User profiles
-
-## Getting Started
-
-### Prerequisites
-- Node.js (v14 or higher)
-- MongoDB (local or Atlas)
-
-### Installation
-
-1. Clone the repository:
-```
-git clone [repository-url]
-cd educonnect-pakistan
-```
-
-2. Install dependencies for the server:
-```
-cd server
-npm install
-```
-
-3. Install dependencies for the client:
-```
-cd ../client
-npm install
-```
-
-4. Create a `.env` file in the server directory with your MongoDB URI and other environment variables (see `.env.example`).
-
-### Running the Application
-
-1. Start the server:
-```
-cd server
-npm run dev
-```
-
-2. In a separate terminal, start the client:
-```
-cd client
-npm start
-```
-
-3. Open your browser and navigate to `http://localhost:3000`
-
-## Demo Accounts
-
-For testing purposes, you can use the following demo accounts:
-
-- Student: student@example.com / password
-- Tutor: tutor@example.com / password
-- Admin: admin@example.com / password
 
 ## License
 
