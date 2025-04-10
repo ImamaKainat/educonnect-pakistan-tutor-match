@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Layout from '@/components/common/Layout';
 import TutorCard, { Tutor } from '@/components/tutors/TutorCard';
@@ -7,6 +6,7 @@ import { FilterOptions, filterTutors } from '@/utils/helpers';
 import { useToast } from '@/components/ui/use-toast';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 // Mock data for tutors
 const mockTutors: Tutor[] = [
